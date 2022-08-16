@@ -16,13 +16,26 @@ jdk_array="$(${JAVA_HOME_CMD} -X | plutil -convert json - -o - | jq -c '.[]')"
 # for jdk in 
 # readarray 等同于 read -a
 
+print_jdk_info() {
+    local jdk=$1
+    # echo ${jdk}
+
+    local arch=$(jq '.JVMArch' <<< ${jdk})
+    local version=$(jq '.JVMVersion' <<< ${jdk})
+    local path=$(jq '.JVMHomePath' <<< ${jdk})
+
+    echo "${version}(${arch}) - ${path}"
+}
+
 # while 循环中，使用 read 命令配合修改 IFS 来正确遍历 jdk_array
 # 因为 read 只能从 stdin 中读取内容，所以需要使用 Here String 来讲变量的值写入到 stdin 中
 # while IFS= read -r jdk; do
 while read jdk; do
-    # echo ${jdk}
-    arch=$(jq '.JVMArch' <<< ${jdk})
-    version=$(jq '.JVMVersion' <<< ${jdk})
-    path=$(jq '.JVMHomePath' <<< ${jdk})
-    echo "${version}(${arch}) - ${path}"
+    print_jdk_info "$jdk"
 done <<< "${jdk_array}"
+
+
+# select brand in Samsung Sony iphone symphony Walton
+# do
+#   echo "You have chosen $brand"
+# done
