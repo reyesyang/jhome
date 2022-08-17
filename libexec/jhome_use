@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -Eeu
+set -o pipefail
+
+# shellcheck source-path=SCRIPTDIR
+jdk_list=$(. "${LIBEXEC_DIR}"/jhome_list)
+
+echo "$jdk_list"

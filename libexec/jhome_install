@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+set -Eeu
+set -o pipefail
+
+# JDK 安装脚本
+# https://adoptium.net/zh-CN/temurin/releases?version=8
+# https://aws.amazon.com/cn/corretto/?filtered-posts.sort-by=item.additionalFields.createdDate&filtered-posts.sort-order=desc
+
+
+# shellcheck source-path=SCRIPTDIR/../lib
+. "${LIB_DIR}"/constants.sh
+
+check_install() {
+    local install_path="${1}"
+    ${JAVA_HOME_CMD} -x | grep "${install_path}" &>/dev/null
+}
+
+build_download_url() {
+    # latest/latest_checksum
+    local type=latest
+
+    # 8
+    local corretto_version=8
+
+    # x64/aarch64
+    # cpu_arch=aarch64
+    local cpu_arch=x64
+
+    # windows/linux/macos
+    local os=macos
+
+    # jre/jdk
+    local package_type=jdk
+
+    # linux: deb/rpm/tar.gz
+    # windows: msi/zip
+    # macos: pkg/tar.gz
+    local file_extension=tar.gz
+
+    echo "https://corretto.aws/downloads/${type}/amazon-corretto-${corretto_version}-${cpu_arch}-${os}-${package_type}.${file_extension}"
+}
+
+jhome_insatll() {
+    # 8
+    local corretto_version=8
+
+    # x64/aarch64
+    # cpu_arch=aarch64
+    local cpu_arch=x64
+
+    # windows/linux/macos
+    local os=macos
+
+    # jre/jdk
+    local package_type=jdk
+
+    local install_folder=amazon-corretto-${corretto_version}-${cpu_arch}
+    local install_path=${JVM_INSTALL_PATH}/${install_folder}
+
+    if check_install "${install_path}"
+    then
+        echo "${install_folder} has been installed"
+        exit 0
+    fi
+
+    # create install folder
+    echo "create install folder: ${install_path}"
+    sudo mkdir "${install_path}"
+
+    # wget 前不添加 sudo 的话，管道后的 tar 命令会卡死不能执行
+    local download_url
+    download_url=$(build_download_url)
+    sudo wget -c "${download_url}" -O - | sudo tar -xz -C "${install_path}" --strip-components 1
+}
+
+jhome_insatll
