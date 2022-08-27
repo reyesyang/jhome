@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
+# set -xEeu
 set -Eeu
 set -o pipefail
 
+# JAVA_HOME_CMD=/usr/libexec/java_home
+
 script_path=$0
 
-if ! script_path=$(readlink -f "${script_path}")
-then
+if ! script_path=$(readlink -f "${script_path}"); then
     # 因为 Mac(BSD) 和 Linux(GNU) 的 readlink 兼容性问题，当 readlink 不支持 -f 参数时，需要使用 while 循环来处理
     while [[ -L ${script_path} ]]; do
         script_path=$(readlink "${script_path}")
@@ -14,45 +16,26 @@ fi
 
 BIN_DIR=$(dirname "${script_path}")
 BASE_DIR=$(dirname "${BIN_DIR}")
+
+echo $BIN_DIR $BASE_DIR
+export JHOME_JDK_INSTALL_DIR="${BASE_DIR}/jdk"
 LIB_DIR=${BASE_DIR}/lib
 LIBEXEC_DIR=${BASE_DIR}/libexec
 
-
-# . "${LIB_DIR}"/log.sh
-
-HELP_TEXT=$(cat << _EOF_
-jhome 0.0.1
-Usage: jhome <command> [<args>]
-
-Some useful jhome commands are:
-install     Install a JDK
-list        List installed JDKs
-
-See 'jhome help <command>' for information on a specific command.
-For full documentation, see: https://github.com/reyesyang/jhome#readme
-_EOF_
-)
-
-print_help() {
-   echo "$HELP_TEXT"
-}
+export PATH="${LIBEXEC_DIR}:$PATH"
 
 command=${1:-""}
 
 case ${command} in
-    list)
-        # shellcheck source-path=SCRIPTDIR/../libexec
-        . "${LIBEXEC_DIR}/jhome_list";;
-    install)
-        # shellcheck source-path=SCRIPTDIR/../libexec
-        . "${LIBEXEC_DIR}"/jhome_install;;
-    use)
-        # shellcheck source-path=SCRIPTDIR/../libexec
-        . "${LIBEXEC_DIR}"/jhome_use;;
-    help|"")
-        print_help;;
-    *)
-        echo "Unrecognized command: ${command}"
-        echo "---"
-        print_help;;
+install | uninstall | list | use)
+    jhome_${command}
+    ;;
+help | "")
+    jhome_help
+    ;;
+*)
+    echo "Unrecognized command: ${command}"
+    echo "---"
+    print_help
+    ;;
 esac

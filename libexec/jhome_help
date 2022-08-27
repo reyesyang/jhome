@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -Eeu
+set -o pipefail
+
+HELP_TEXT=$(cat << _EOF_
+jhome 0.0.1
+Usage: jhome <command> [<args>]
+
+Some useful jhome commands are:
+install     Install a JDK
+list        List installed JDKs
+
+See 'jhome help <command>' for information on a specific command.
+For full documentation, see: https://github.com/reyesyang/jhome#readme
+_EOF_
+)
+
+jhome_help() {
+   echo "$HELP_TEXT"
+}
+
+jhome_help
